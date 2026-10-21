@@ -61,7 +61,8 @@ For iOS builds the -minsdk flag specify the minimum iOS version. For example,
 use -mindk 15 to target iOS 15.0 and later.
 
 For Android builds the -targetsdk flag specify the target SDK level. For example,
-use -targetsdk 33 to target Android 13 (Tiramisu) and later.
+use -targetsdk 33 to target Android 13 (Tiramisu) and later. The default is the
+newest platform installed in the Android SDK.
 
 The -work flag prints the path to the working directory and suppress
 its deletion.

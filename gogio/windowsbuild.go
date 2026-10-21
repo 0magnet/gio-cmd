@@ -204,10 +204,10 @@ func (b *windowsBuilder) buildProgram(buildInfo *buildInfo, name string, arch st
 
 	ldflags := buildInfo.ldflags
 	if buildInfo.schemes != nil {
-		ldflags += ` -X "gioui.org/app.schemesURI=` + strings.Join(buildInfo.schemes, ",") + `" `
+		ldflags += ` -X "github.com/0magnet/gio/app.schemesURI=` + strings.Join(buildInfo.schemes, ",") + `" `
 	}
 	if buildInfo.appID != "" {
-		ldflags += ` -X "gioui.org/app.ID=` + buildInfo.appID + `" `
+		ldflags += ` -X "github.com/0magnet/gio/app.ID=` + buildInfo.appID + `" `
 	}
 
 	cmd := exec.Command(

@@ -142,13 +142,13 @@ func getLdFlags(appID string) string {
 		ldflags = append(ldflags, strings.Split(extra, " ")...)
 	}
 	// Pass appID along, to be used for logging on platforms like Android.
-	ldflags = append(ldflags, fmt.Sprintf("-X gioui.org/app.ID=%s", appID))
+	ldflags = append(ldflags, fmt.Sprintf("-X github.com/0magnet/gio/app.ID=%s", appID))
 	// Support earlier Gio versions that had a separate app id recorded.
 	// TODO: delete this in the future.
-	ldflags = append(ldflags, fmt.Sprintf("-X gioui.org/app/internal/log.appID=%s", appID))
+	ldflags = append(ldflags, fmt.Sprintf("-X github.com/0magnet/gio/app/internal/log.appID=%s", appID))
 	// Pass along all remaining arguments to the app.
 	if appArgs := flag.Args()[1:]; len(appArgs) > 0 {
-		ldflags = append(ldflags, fmt.Sprintf("-X gioui.org/app.extraArgs=%s", strings.Join(appArgs, "|")))
+		ldflags = append(ldflags, fmt.Sprintf("-X github.com/0magnet/gio/app.extraArgs=%s", strings.Join(appArgs, "|")))
 	}
 	if m := *linkMode; m != "" {
 		ldflags = append(ldflags, "-linkmode="+m)

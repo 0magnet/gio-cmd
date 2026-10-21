@@ -18,14 +18,14 @@ import (
 	"strings"
 	"unsafe"
 
-	"gioui.org/app"
-	"gioui.org/gpu"
-	"gioui.org/io/event"
-	"gioui.org/io/pointer"
-	"gioui.org/layout"
-	"gioui.org/op"
-	"gioui.org/op/clip"
-	"gioui.org/op/paint"
+	"github.com/0magnet/gio/app"
+	"github.com/0magnet/gio/gpu"
+	"github.com/0magnet/gio/io/event"
+	"github.com/0magnet/gio/io/pointer"
+	"github.com/0magnet/gio/layout"
+	"github.com/0magnet/gio/op"
+	"github.com/0magnet/gio/op/clip"
+	"github.com/0magnet/gio/op/paint"
 )
 
 /*

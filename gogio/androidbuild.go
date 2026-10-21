@@ -23,6 +23,8 @@ import (
 type androidTools struct {
 	buildtools string
 	androidjar string
+	// api is the platform's API level, the default target SDK.
+	api int
 }
 
 // zip.Writer with a sticky error.
@@ -85,7 +87,7 @@ func buildAndroid(tmpDir string, bi *buildInfo) error {
 	if _, err := os.Stat(sdk); err != nil {
 		return err
 	}
-	platform, err := latestPlatform(sdk)
+	platform, api, err := latestPlatform(sdk)
 	if err != nil {
 		return err
 	}
@@ -97,9 +99,10 @@ func buildAndroid(tmpDir string, bi *buildInfo) error {
 	tools := &androidTools{
 		buildtools: buildtools,
 		androidjar: filepath.Join(platform, "android.jar"),
+		api:        api,
 	}
 	perms := []string{"default"}
-	const permPref = "gioui.org/app/permission/"
+	const permPref = "github.com/0magnet/gio/app/permission/"
 	cfg := &packages.Config{
 		Mode: packages.NeedName +
 			packages.NeedFiles +
@@ -239,7 +242,7 @@ func compileAndroid(tmpDir string, tools *androidTools, bi *buildInfo) (err erro
 			return err
 		})
 	}
-	appDir, err := runCmd(exec.Command("go", "list", "-tags", bi.tags, "-f", "{{.Dir}}", "gioui.org/app/"))
+	appDir, err := runCmd(exec.Command("go", "list", "-tags", bi.tags, "-f", "{{.Dir}}", "github.com/0magnet/gio/app/"))
 	if err != nil {
 		return err
 	}
@@ -248,7 +251,7 @@ func compileAndroid(tmpDir string, tools *androidTools, bi *buildInfo) (err erro
 		return err
 	}
 	if len(javaFiles) == 0 {
-		return fmt.Errorf("the gioui.org/app package contains no .java files (gioui.org module too old?)")
+		return fmt.Errorf("the github.com/0magnet/gio/app package contains no .java files (gioui.org module too old?)")
 	}
 	if len(javaFiles) > 0 {
 		classes := filepath.Join(tmpDir, "classes")
@@ -353,8 +356,9 @@ func exeAndroid(tmpDir string, tools *androidTools, bi *buildInfo, extraJars, pe
 		return err
 	}
 	minSDK := max(bi.minsdk, 16)
+	// The newest platform installed, as the stores ask for a recent one.
 	// https://developer.android.com/distribute/best-practices/develop/target-sdk
-	targetSDK := 35
+	targetSDK := tools.api
 	if bi.targetsdk > 0 {
 		targetSDK = bi.targetsdk
 	}
@@ -884,31 +888,33 @@ func getPermissions(ps []string) ([]string, []string) {
 	return permissions, features
 }
 
-func latestPlatform(sdk string) (string, error) {
+func latestPlatform(sdk string) (string, int, error) {
 	allPlats, err := filepath.Glob(filepath.Join(sdk, "platforms", "android-*"))
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
-	var bestVer int
+	var bestVer, bestMinor int
 	var bestPlat string
 	for _, platform := range allPlats {
 		_, name := filepath.Split(platform)
-		// The glob above guarantees the "android-" prefix.
-		verStr := name[len("android-"):]
+		// The glob above guarantees the "android-" prefix. Newer SDK managers
+		// name a platform by API level and minor version: android-37.0.
+		verStr, minorStr, _ := strings.Cut(name[len("android-"):], ".")
 		ver, err := strconv.Atoi(verStr)
 		if err != nil {
 			continue
 		}
-		if ver < bestVer {
+		minor, _ := strconv.Atoi(minorStr)
+		if ver < bestVer || ver == bestVer && minor < bestMinor {
 			continue
 		}
-		bestVer = ver
+		bestVer, bestMinor = ver, minor
 		bestPlat = platform
 	}
 	if bestPlat == "" {
-		return "", fmt.Errorf("no platforms found in %q", sdk)
+		return "", 0, fmt.Errorf("no platforms found in %q", sdk)
 	}
-	return bestPlat, nil
+	return bestPlat, bestVer, nil
 }
 
 func latestCompiler(tcRoot, a string, minsdk int) (string, error) {

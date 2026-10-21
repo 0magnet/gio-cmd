@@ -69,7 +69,7 @@ func TestEndToEnd(t *testing.T) {
 	t.Parallel()
 
 	const (
-		testdataWithGoImportPkgPath             = "gioui.org/cmd/gogio/internal/normal"
+		testdataWithGoImportPkgPath             = "github.com/0magnet/gio-cmd/gogio/internal/normal"
 		testdataWithRelativePkgPath             = "internal/normal/testdata.go"
 		customRenderTestdataWithRelativePkgPath = "internal/custom/testdata.go"
 	)
