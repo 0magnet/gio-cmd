@@ -3,7 +3,7 @@ module github.com/0magnet/gio-cmd
 go 1.24.1
 
 require (
-	github.com/0magnet/gio v0.10.4-0.20261021161935-ee4944b41af4
+	github.com/0magnet/gio v0.10.4-0.20261021192951-b1a9a9fdf399
 	github.com/akavel/rsrc v0.10.1
 	github.com/chromedp/cdproto v0.0.0-20250429231605-6ed5b53462d4
 	github.com/chromedp/chromedp v0.13.6
