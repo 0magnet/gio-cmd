@@ -23,6 +23,8 @@ import (
 type androidTools struct {
 	buildtools string
 	androidjar string
+	// api is the platform's API level, the default target SDK.
+	api int
 }
 
 // zip.Writer with a sticky error.
@@ -85,7 +87,7 @@ func buildAndroid(tmpDir string, bi *buildInfo) error {
 	if _, err := os.Stat(sdk); err != nil {
 		return err
 	}
-	platform, err := latestPlatform(sdk)
+	platform, api, err := latestPlatform(sdk)
 	if err != nil {
 		return err
 	}
@@ -97,6 +99,7 @@ func buildAndroid(tmpDir string, bi *buildInfo) error {
 	tools := &androidTools{
 		buildtools: buildtools,
 		androidjar: filepath.Join(platform, "android.jar"),
+		api:        api,
 	}
 	perms := []string{"default"}
 	const permPref = "gioui.org/app/permission/"
@@ -353,8 +356,9 @@ func exeAndroid(tmpDir string, tools *androidTools, bi *buildInfo, extraJars, pe
 		return err
 	}
 	minSDK := max(bi.minsdk, 16)
+	// The newest platform installed, as the stores keep raising the floor.
 	// https://developer.android.com/distribute/best-practices/develop/target-sdk
-	targetSDK := 35
+	targetSDK := tools.api
 	if bi.targetsdk > 0 {
 		targetSDK = bi.targetsdk
 	}
@@ -884,10 +888,10 @@ func getPermissions(ps []string) ([]string, []string) {
 	return permissions, features
 }
 
-func latestPlatform(sdk string) (string, error) {
+func latestPlatform(sdk string) (string, int, error) {
 	allPlats, err := filepath.Glob(filepath.Join(sdk, "platforms", "android-*"))
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
 	var bestVer, bestMinor int
 	var bestPlat string
@@ -908,9 +912,9 @@ func latestPlatform(sdk string) (string, error) {
 		bestPlat = platform
 	}
 	if bestPlat == "" {
-		return "", fmt.Errorf("no platforms found in %q", sdk)
+		return "", 0, fmt.Errorf("no platforms found in %q", sdk)
 	}
-	return bestPlat, nil
+	return bestPlat, bestVer, nil
 }
 
 func latestCompiler(tcRoot, a string, minsdk int) (string, error) {

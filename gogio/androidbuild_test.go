@@ -15,11 +15,14 @@ func TestLatestPlatform(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	got, err := latestPlatform(sdk)
+	got, api, err := latestPlatform(sdk)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if want := filepath.Join(sdk, "platforms", "android-37.0"); got != want {
 		t.Errorf("latestPlatform = %s, want %s", got, want)
+	}
+	if api != 37 {
+		t.Errorf("latestPlatform API level = %d, want 37", api)
 	}
 }
